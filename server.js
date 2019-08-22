@@ -23,7 +23,7 @@ const config_core = require('./config/core.js');
 const config_mail = require('./config/mail.js');
 
 /***************************************************** pug */
-app.set('views', path.join(__dirname, 'app/views'));
+app.set('views', path.join(__dirname, 'app'));
 app.set('view engine', 'pug');
 
 /***************************************************** mailer */
@@ -64,9 +64,15 @@ app.use(function(req, res, next){
 });
 
 /***************************************************** BL */
-require('./app/index.route').mountRoutes(app);
-require('./app/user').init(app)
-require('./app/note').init(app)
+app.get('/', function(req, res){
+  res.render('./views/main');
+});
+require('./app/user').init(app);
+require('./app/note').init(app);
+require('./app/registration').router(app);
+
+const mountRoutes = require('./app/index.route');
+mountRoutes(app);
 
 /***************************************************** 404 */
 app.use(function(req, res, next) {
@@ -79,7 +85,8 @@ app.use(function(err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   res.status(err.status || 500);
-  res.render('view_errorpage');
+  res.render('./views/errorpage');
+
 });
 
 module.exports = app;
