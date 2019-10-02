@@ -1,2 +1,3 @@
 *.pug
 node_modules/
+config/mail.js

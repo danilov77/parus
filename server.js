@@ -46,7 +46,7 @@ app.use(session({
   name: config_core.expressSession.name,
   resave: config_core.expressSession.resave,
   saveUninitialized: config_core.expressSession.saveUninitialized,
-  store: new RedisStore({ host: 'localhost', port: 6480, ttl: 86400 }),
+  store: new RedisStore(config_core.redis),
 }));
 
 app.use(passport.initialize());
@@ -67,12 +67,13 @@ app.use(function(req, res, next){
 app.get('/', function(req, res){
   res.render('./views/main');
 });
-require('./app/user').init(app);
-require('./app/note').init(app);
 require('./app/registration').router(app);
+require('./app/user').router(app);
+require('./app/note').init(app);
+require('./app/reglink').router(app);
 
-const mountRoutes = require('./app/index.route');
-mountRoutes(app);
+//const mountRoutes = require('./app/index.route');
+//mountRoutes(app);
 
 /***************************************************** 404 */
 app.use(function(req, res, next) {

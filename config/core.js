@@ -13,8 +13,12 @@ var coreOptions = {
     passGen: {
         symbols: 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ%*)?@#$~',
         length_min: 7,
-        length_max: 9
-    }
+        length_max: 9 },
+
+	redis: { 
+		host: 'localhost', 
+		port: 6379, 
+		ttl: 86400 }
 
 }
 
