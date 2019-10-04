@@ -70,7 +70,7 @@ var RegLink = class {
 		}
 	}
 
-	async set_send() {
+	async set_send_at() {
 
         const sql = 'UPDATE reglinks SET send_at = NOW() WHERE id = $1';
 		const values = [this.row.uid];

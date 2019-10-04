@@ -3,28 +3,33 @@ const coreLib = require("../lib/core.lib");
 const userModel = require("../user/model");
 const uuidv1 = require('uuid/v1');
 
+/*************************************************************************** add
+ 1. СЧИТАЕМ expires_at
+ 2. ГЕНЕРИРУЕМ случайную строку
+ 3. ДОБАВЛЯЕМ
+*/
 var add = async function (obj){
 
+    // 1.
     let expires_at = new Date();
     const hour = expires_at.getHours();
     expires_at.setHours(hour+3);
 
+    // 2.
     obj.note = uuidv1();
+    // 3.
     obj.add(expires_at);
 		
 };
 
-/*************************************************************************** add
+/*************************************************************************** send
  1. ПРОВЕРЯЕМ есть ли отправка с таким e-mail
  2. ПРОВЕРЯЕМ есть ли пользователь с таким e-mail
- 3. ДОБАВЛЯЕМ новую ссылку
- 4. ОТПРАВЛЯЕМ ссылку на e-mail
- */
-
+ 3. ДОБАВЛЯЕМ
+*/
 var send = async function (email){
 
   var resp = {result:0};
-  var csrf = '';
 
   // 0.
   var check = await coreLib.checkEmail(email);
@@ -39,7 +44,8 @@ var send = async function (email){
 
   if (RegLink.is_exists) {
 
-    csrf = RegLink.note;
+    resp.result = 1;
+    resp.reglink = RegLink;
 
   } else {
 
@@ -55,25 +61,36 @@ var send = async function (email){
     // 3.
     add(RegLink);
 
-    csrf = RegLink.note;
+    resp.result = 1;
+    resp.reglink = RegLink;
 
   }
-
-  // 4.
-  app.mailer.send( 'mail_reg', {
-      to: RegLink.email,
-      subject: 'PARUS - Регистрация',
-      regcode: RegLink.note
-  }, function (err) {
-      if (err) {
-          console.error(err);
-      } else {
-          RegLink.set_send();
-      }
-  });
 
   return resp;
 
 };
 
+/*************************************************************************** exists
+ 1. ПОИСК ссылки
+*/
+var exists = async function (code){
+
+  var resp = {result:0};
+
+  // 1.
+  var RegLink = new reglinkModel.RegLink('',code);
+
+  await RegLink.getByCode();
+
+  if (RegLink.is_exists) {
+
+    resp.result = 1;
+    resp.reglink = RegLink;
+
+  }
+
+  return resp;
+};
+
 module.exports.send = send;
+module.exports.exists = exists;
