@@ -1,35 +1,38 @@
 const passport = require('passport');
-//const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
 
 const authenticationMiddleware = require('./middleware');
+const userModel = require("../user/model");
 
-// Generate Password
-const saltRounds = 10;
-const myPlaintextPassword = 'my-password';
-//const salt = bcrypt.genSaltSync(saltRounds);
-//const passwordHash = bcrypt.hashSync(myPlaintextPassword, salt);
-const passwordHash = myPlaintextPassword;
+async function findUser (username, callback) {
 
-const user = {
-  username: 'test-user',
-  passwordHash,
-  id: 1
+  var User = new userModel.User(username);
+  await User.getByEmail();
+  if (User.is_exists) {
+    return callback(null, User)
+  }
+  return callback(null)
 };
 
-function findUser (username, callback) {
-  if (username === user.username) {
-    return callback(null, user)
+async function findUserUid (uid, callback) {
+
+  var User = new userModel.User();
+  User.row.uid = uid;
+  await User.getByUid();
+  if (User.is_exists) {
+    return callback(null, User)
   }
   return callback(null)
 };
 
 passport.serializeUser(function (user, cb) {
-  cb(null, user.username)
+  cb(null, user.row.uid)
 });
 
-passport.deserializeUser(function (username, cb) {
-  findUser(username, cb)
+passport.deserializeUser(function (uid, cb) {
+  findUserUid(uid, cb);
+  //cb(null, false);  -- only kill user
 });
 
 function initPassport () {
@@ -39,29 +42,20 @@ function initPassport () {
         if (err) {
           return done(err)
         }
-
         // User not found
         if (!user) {
-          console.log('User not found')
-          return done(null, false)
+          return done(null, false, {message: 'Пользователь 1 с таким именем и паролем не найден'})
         }
 
-        // Always use hashed passwords and fixed time comparison
-        /*
-        bcrypt.compare(password, user.passwordHash, (err, isValid) => {
+        bcrypt.compare(password, user.row.spass, (err, isValid) => {
           if (err) {
             return done(err)
           }
           if (!isValid) {
-            return done(null, false)
+            return done(null, false, {message: 'Пользователь 2 с таким именем и паролем не найден'})
           }
           return done(null, user)
         });
-        */
-        if (password === user.passwordHash) {
-          return done(null, user)
-        } else return done(err);
-
       })
     }
   ))

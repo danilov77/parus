@@ -3,6 +3,28 @@ const coreLib = require("../lib/core.lib");
 const userModel = require("../user/model");
 const uuidv1 = require('uuid/v1');
 
+/*************************************************************************** get
+ 1. ПОИСК ссылки
+*/
+var get = async function (code){
+
+  var resp = {};
+
+  // 1.
+  var RegLink = new reglinkModel.RegLink('',code);
+
+  await RegLink.getByCode();
+
+  if (RegLink.is_exists) {
+
+    resp.result = 1;
+    resp.reglink = RegLink;
+
+  }
+
+  return resp;
+};
+
 /*************************************************************************** add
  1. СЧИТАЕМ expires_at
  2. ГЕНЕРИРУЕМ случайную строку
@@ -29,12 +51,12 @@ var add = async function (obj){
 */
 var send = async function (email){
 
-  var resp = {result:0};
+  var resp = {};
 
   // 0.
   var check = await coreLib.checkEmail(email);
   if (!check) {
-      resp.error = 'checkEmail';
+      resp.error.error_code = 'checkEmail';
       return resp;
   }
 
@@ -51,10 +73,10 @@ var send = async function (email){
 
     // 2.
     var User = new userModel.User(email);
-    User.getByEmail();
+    await User.getByEmail();
 
     if (User.is_exists) {
-        resp.error = 'userExists';
+        resp.error.error_code = 'userExists';
         return resp;
     }
 
@@ -70,27 +92,33 @@ var send = async function (email){
 
 };
 
-/*************************************************************************** exists
- 1. ПОИСК ссылки
+/*************************************************************************** del
+ 1. УДАЛЯЕМ
 */
-var exists = async function (code){
-
-  var resp = {result:0};
+var delById = async function (id){
 
   // 1.
-  var RegLink = new reglinkModel.RegLink('',code);
+  var RegLink = new reglinkModel.RegLink();
+  RegLink.id = id;
 
-  await RegLink.getByCode();
+  var resp = await RegLink.delById();
 
-  if (RegLink.is_exists) {
-
-    resp.result = 1;
-    resp.reglink = RegLink;
-
-  }
-
+  resp.result = 1;
   return resp;
+
 };
 
+var clear = async function (){
+  // 1.
+  var RegLink = new reglinkModel.RegLink();
+  var resp = await RegLink.del();
+
+  resp.result = 1;
+  return resp;
+
+};
+
+module.exports.get = get;
 module.exports.send = send;
-module.exports.exists = exists;
+module.exports.delById = delById;
+module.exports.clear = clear;

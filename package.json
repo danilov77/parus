@@ -12,6 +12,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^3.0.6",
     "bootstrap": "^4.3.1",
     "connect-flash": "^0.1.1",
     "connect-redis": "^3.4.2",
@@ -26,7 +27,9 @@
     "git": "^0.1.5",
     "http-errors": "~1.6.3",
     "jquery": "^3.4.1",
+    "md5": "^2.2.1",
     "morgan": "~1.9.1",
+    "multiparty": "^4.2.1",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "password-generator": "^2.2.0",

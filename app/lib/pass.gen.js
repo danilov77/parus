@@ -26,7 +26,7 @@ function isStrongEnough(password) {
         sc && sc.length >= specialMinCount;
 }
 
-function customPassword() {
+async function customPassword() {
     var password = "";
     var randomLength = Math.floor(Math.random() * (maxLength - minLength)) + minLength;
     while (!isStrongEnough(password)) {

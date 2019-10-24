@@ -1,6 +1,6 @@
 const express = require('express');
+const app = express();
 const path = require('path');
-//const favicon = require('serve-favicon');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
@@ -8,15 +8,10 @@ const flash = require('connect-flash');
 const createError = require('http-errors');
 const mailer = require('express-mailer');
 const Csurf = require('csurf');
+const passport = require('passport');
 const session = require('express-session');
 const connectRedis = require('connect-redis');
-const passport = require('passport');
-const passportLocal = require('passport-local');
-const auth = require('./app/authentication');
-
-const app = express();
 const RedisStore = connectRedis(session);
-const LocalStrategy = passportLocal.Strategy;
 
 /***************************************************** config */
 const config_core = require('./config/core.js');
@@ -39,11 +34,12 @@ app.use(cookieParser(config_core.cookieSecret));
 app.use(flash());
 
 /***************************************************** passport */
-auth.init(app);
+require('./app/authentication').init(app);
+// setting https://habr.com/ru/post/435106/
 
 app.use(session({
   secret: config_core.expressSession.secret,
-  name: config_core.expressSession.name,
+  //name: config_core.expressSession.name,
   resave: config_core.expressSession.resave,
   saveUninitialized: config_core.expressSession.saveUninitialized,
   store: new RedisStore(config_core.redis),
@@ -52,14 +48,12 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-/***************************************************** CSURF FLASH */
+/***************************************************** CSURF */
 var csurf = Csurf();
 app.use(csurf);
 
 app.use(function(req, res, next){
   res.locals._csrfToken = req.csrfToken();
-  res.locals.flash = req.session.flash;
-  delete req.session.flash;
   next();
 });
 
@@ -69,11 +63,12 @@ app.get('/', function(req, res){
 });
 require('./app/registration').router(app);
 require('./app/user').router(app);
-require('./app/note').init(app);
 require('./app/reglink').router(app);
+require('./app/authentication').router(app);
+require('./app/start').router(app);
+require('./app/main').router(app);
 
-//const mountRoutes = require('./app/index.route');
-//mountRoutes(app);
+require('./app/upload').router(app);
 
 /***************************************************** 404 */
 app.use(function(req, res, next) {

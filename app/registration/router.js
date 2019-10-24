@@ -1,4 +1,3 @@
-
 function router (app) {
 
   app.post('/registration', (req, res) => {

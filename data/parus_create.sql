@@ -8,6 +8,7 @@ DROP INDEX user_cards_user_idx;
 
 DROP VIEW v_codes;
 DROP VIEW v_reglinks;
+DROP VIEW v_user_cards;
 DROP VIEW v_users;
 DROP TABLE codes;
 DROP TABLE user_cards;
@@ -28,21 +29,24 @@ CREATE TABLE codes(
 CREATE TABLE users(
    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-   name         VARCHAR(180),
+   name         VARCHAR(180) NOT NULL,
    email        VARCHAR(180) NOT NULL,
    is_block     BOOLEAN DEFAULT FALSE,
-   pass         VARCHAR(240) NOT NULL,
-   page_start   VARCHAR(180) DEFAULT 'profile'
+   pass         VARCHAR(240),
+   page_start   VARCHAR(180) DEFAULT 'start',
+   lev          SMALLINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE user_cards(
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL references users(id),
-    birthday        date,
+    birthday        DATE,
     livesplace      VARCHAR(400),
+    livesplacelat   REAL,
+    livesplacelng   REAL,
     sex             SMALLINT,
     phonenumber     VARCHAR(20),
-    phoneconfirm    BOOLEAN DEFAULT FALSE,
+    phoneconfirm    SMALLINT,
     nationality     VARCHAR(20),
     education       VARCHAR(20),
     height          SMALLINT,
@@ -55,7 +59,7 @@ CREATE TABLE user_cards(
     photo3          VARCHAR(400),
     photoavatar     VARCHAR(400),
     photomain       SMALLINT,
-    balance         SMALLINT
+    balance         SMALLINT DEFAULT 0
 );
 
 CREATE TABLE reglinks(
@@ -95,7 +99,17 @@ SELECT id, created_at, email, expires_at, note, send_at
 FROM reglinks;
 
 CREATE VIEW v_users
-    (uid, tcreated_at, sname, semail, bis_block, spass, spage_start)
+    (uid, tcreated_at, sname, semail, bis_block, spass, spage_start, nlev)
 AS
-SELECT id, created_at, name, email, is_block, pass, page_start
+SELECT id, created_at, name, email, is_block, pass, page_start, lev
 FROM users;
+
+CREATE VIEW v_user_cards
+    (uid, uuser_id, dbirthday, slivesplace, rlivesplacelat, rlivesplacelng, nsex, sphonenumber, nphoneconfirm,
+    snationality, seducation, nheight, nweight, sworking, shobby, tabout, sphoto1,
+    sphoto2, sphoto3, sphotoavatar, nphotomain, nbalance)
+AS
+SELECT id, user_id, birthday, livesplace, livesplacelat, livesplacelng, sex, phonenumber, phoneconfirm,
+    nationality, education, height, weight, working, hobby, about, photo1,
+    photo2, photo3, photoavatar, photomain, balance
+FROM user_cards;

@@ -16,4 +16,21 @@ var checkEmail = async function (email) {
     return result;
 };
 
+var randomIntGet = async function (min, max)	{
+	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+var randN = async function (min,max){
+
+	var s ='';
+	const abd ='abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	var aL = abd.length;
+	const n = await randomIntGet(Number(min), Number(max))
+
+	while(s.length < n)
+		s += abd[Math.random() * aL|0];
+	return s;	
+}
+
 module.exports.checkEmail = checkEmail;
+module.exports.randN = randN;
